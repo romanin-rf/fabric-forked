@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "fabric-forked"
+version = "1.0.322"
+description = "High level SSH command execution (forked by fabric)."
+authors = ["Romanin <60302782+romanin-rf@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

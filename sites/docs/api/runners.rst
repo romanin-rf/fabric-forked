@@ -1,5 +1,0 @@
-===========
-``runners``
-===========
-
-.. automodule:: fabric.runners

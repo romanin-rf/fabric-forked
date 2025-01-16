@@ -1,5 +1,0 @@
-=========
-``tasks``
-=========
-
-.. automodule:: fabric.tasks

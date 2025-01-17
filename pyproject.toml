@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fabric-forked"
-version = "1.0.322"
+version = "1.322.0"
 description = "High level SSH command execution (forked by fabric)."
 authors = ["Romanin <60302782+romanin-rf@users.noreply.github.com>"]
 license = "MIT"

@@ -1,5 +1,0 @@
-========
-``auth``
-========
-
-.. automodule:: fabric.auth

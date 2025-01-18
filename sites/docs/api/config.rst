@@ -1,5 +1,0 @@
-==============
-``config``
-==============
-
-.. automodule:: fabric.config

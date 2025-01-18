@@ -1,5 +1,0 @@
-========
-``util``
-========
-
-.. automodule:: fabric.util

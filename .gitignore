@@ -18,3 +18,7 @@ tox.ini
 .idea/
 htmlcov
 .cache
+__pycache__/
+.venv/
+.vscode/
+*.lock

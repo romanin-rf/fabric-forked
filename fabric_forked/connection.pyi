@@ -6,81 +6,25 @@ from paramiko.client import SSHClient
 from paramiko.sftp_client import SFTPClient
 from paramiko.config import SSHConfig
 from paramiko.proxy import ProxyCommand
-from paramiko.pkey import PKey
 from paramiko.transport import Transport
-from paramiko.auth_strategy import AuthStrategy
 from paramiko.channel import Channel
-from invoke.runners import Result
 
-from .config import Config, InvokeConfigDefaultsRun, InvokeConfigDefaultsSudo
+from .config import Config
 from .runners import Remote
+from ._types import (
+    Result, Gateway,
+    DictHost, ConnectKwargs,
+    SudoKwargs, RunKwargs,
+    AttributeDict
+)
 
 from os import PathLike
 from typing_extensions import (
     Any,
     IO,
-    NamedTuple, TypedDict,
     Literal,
-    Callable,
-    Self, TypeVar, Unpack
+    Self, Unpack
 )
-
-RunKwargs = InvokeConfigDefaultsRun
-SudoKwargs = InvokeConfigDefaultsSudo
-
-ReturnType = TypeVar('ReturnType')
-
-
-class DictHost(TypedDict):
-    host: str | None
-    port: str | None
-    user: str | None
-
-class AttributeDict(NamedTuple):
-    host_string: str | None
-    key_filename: str | None
-    port: str | None
-    user: str | None
-
-class ConnectKwargs(TypedDict):
-    hostname: str
-    port: int
-    username: str
-    password: str
-    pkey: PKey
-    key_filename: str
-    timeout: float
-    allow_agent: bool
-    look_for_keys: bool
-    compress: bool
-    sock: Any
-    gss_auth: bool
-    gss_kex: bool
-    gss_deleg_creds: bool
-    gss_host: str
-    banner_timeout: float
-    auth_timeout: float
-    channel_timeout: float
-    gss_trust_dns: bool
-    passphrase: str
-    disabled_algorithms: dict[str, list[str]]
-    transport_factory: Callable[..., Transport]
-    auth_strategy: AuthStrategy
-
-
-class ConnectionKwargs(TypedDict):
-    host: str
-    user: str | None
-    port: int | None
-    config: Config | None
-    gateway: str | Gateway | Literal[False] | None
-    forward_agent: bool | None
-    connect_timeout: float | None
-    connect_kwargs: ConnectKwargs | None
-    inline_ssh_env: bool | None
-
-
-Gateway = Channel | ProxyCommand | Connection
 
 
 def derive_shorthand(host_string: str) -> DictHost: ...
@@ -370,6 +314,7 @@ class Connection(Context):
     def __eq__(self, other: Connection) -> bool: ...
     def __lt__(self, other: Connection) -> bool: ...
     def __hash__(self) -> int: ...
+    def __getattr__(self, key: str): ...
     
     def __enter__(self) -> Self: ...
     def __exit__(self, *args: type[BaseException] | BaseException | None) -> None: ...

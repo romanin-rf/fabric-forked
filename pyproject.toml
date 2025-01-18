@@ -29,6 +29,10 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.10"
+paramiko = "^3.5.0"
+invoke = "^2.2.0"
+typing-extensions = "^4.12.2"
+decorator = "^5.1.1"
 
 
 [build-system]

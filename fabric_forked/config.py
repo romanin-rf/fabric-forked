@@ -14,32 +14,17 @@ class Config(InvokeConfig):
 
     @classmethod
     def from_v1(cls, env, **kwargs):
-        # TODO: automagic import, if we can find a way to test that
-        # Use overrides level (and preserve whatever the user may have given)
-        # TODO: we really do want arbitrary number of config levels, don't we?
-        # TODO: most of these need more care re: only filling in when they
-        # differ from the v1 default. As-is these won't overwrite runtime
-        # overrides (due to .setdefault) but they may still be filling in empty
-        # values to stomp on lower level config levels...
         data = kwargs.pop("overrides", {})
-        # TODO: just use a dataproxy or defaultdict??
         for subdict in ("connect_kwargs", "run", "sudo", "timeouts"):
             data.setdefault(subdict, {})
-        # PTY use
         data["run"].setdefault("pty", env.always_use_pty)
-        # Gateway
         data.setdefault("gateway", env.gateway)
-        # Agent forwarding
         data.setdefault("forward_agent", env.forward_agent)
-        # Key filename(s)
         if env.key_filename is not None:
             data["connect_kwargs"].setdefault("key_filename", env.key_filename)
-        # Load keys from agent?
         data["connect_kwargs"].setdefault("allow_agent", not env.no_agent)
         data.setdefault("ssh_config_path", env.ssh_config_path)
-        # Sudo password
         data["sudo"].setdefault("password", env.sudo_password)
-        # Vanilla password (may be used for regular and/or sudo, depending)
         passwd = env.password
         data["connect_kwargs"].setdefault("password", passwd)
         if not data["sudo"]["password"]:
@@ -48,38 +33,22 @@ class Config(InvokeConfig):
         data["timeouts"].setdefault("connect", env.timeout)
         data.setdefault("load_ssh_configs", env.use_ssh_config)
         data["run"].setdefault("warn", env.warn_only)
-        # Put overrides back for real constructor and go
         kwargs["overrides"] = data
         return cls(**kwargs)
 
     def __init__(self, *args, **kwargs):
-        # Tease out our own kwargs.
-        # TODO: consider moving more stuff out of __init__ and into methods so
-        # there's less of this sort of splat-args + pop thing? Eh.
         ssh_config = kwargs.pop("ssh_config", None)
         lazy = kwargs.get("lazy", False)
         self.set_runtime_ssh_path(kwargs.pop("runtime_ssh_path", None))
         system_path = kwargs.pop("system_ssh_path", "/etc/ssh/ssh_config")
         self._set(_system_ssh_path=system_path)
         self._set(_user_ssh_path=kwargs.pop("user_ssh_path", "~/.ssh/config"))
-
-        # Record whether we were given an explicit object (so other steps know
-        # whether to bother loading from disk or not)
-        # This needs doing before super __init__ as that calls our post_init
         explicit = ssh_config is not None
         self._set(_given_explicit_object=explicit)
-
-        # Arrive at some non-None SSHConfig object (upon which to run .parse()
-        # later, in _load_ssh_file())
         if ssh_config is None:
             ssh_config = SSHConfig()
         self._set(base_ssh_config=ssh_config)
-
-        # Now that our own attributes have been prepared & kwargs yanked, we
-        # can fall up into parent __init__()
         super().__init__(*args, **kwargs)
-
-        # And finally perform convenience non-lazy bits if needed
         if not lazy:
             self.load_ssh_config()
 
@@ -87,62 +56,31 @@ class Config(InvokeConfig):
         self._set(_runtime_ssh_path=path)
 
     def load_ssh_config(self):
-        # Update the runtime SSH config path (assumes enough regular config
-        # levels have been loaded that anyone wanting to transmit this info
-        # from a 'vanilla' Invoke config, has gotten it set.)
         if self.ssh_config_path:
             self._runtime_ssh_path = self.ssh_config_path
-        # Load files from disk if we weren't given an explicit SSHConfig in
-        # __init__
         if not self._given_explicit_object:
             self._load_ssh_files()
 
     def clone(self, *args, **kwargs):
-        # TODO: clone() at this point kinda-sorta feels like it's retreading
-        # __reduce__ and the related (un)pickling stuff...
-        # Get cloned obj.
-        # NOTE: Because we also extend .init_kwargs, the actual core SSHConfig
-        # data is passed in at init time (ensuring no files get loaded a 2nd,
-        # etc time) and will already be present, so we don't need to set
-        # .base_ssh_config ourselves. Similarly, there's no need to worry about
-        # how the SSH config paths may be inaccurate until below; nothing will
-        # be referencing them.
         new = super().clone(*args, **kwargs)
-        # Copy over our custom attributes, so that the clone still resembles us
-        # re: recording where the data originally came from (in case anything
-        # re-runs ._load_ssh_files(), for example).
         for attr in (
             "_runtime_ssh_path",
             "_system_ssh_path",
             "_user_ssh_path",
         ):
             setattr(new, attr, getattr(self, attr))
-        # Load SSH configs, in case they weren't prior to now (e.g. a vanilla
-        # Invoke clone(into), instead of a us-to-us clone.)
         self.load_ssh_config()
-        # All done
         return new
 
     def _clone_init_kwargs(self, *args, **kw):
-        # Parent kwargs
         kwargs = super()._clone_init_kwargs(*args, **kw)
-        # Transmit our internal SSHConfig via explicit-obj kwarg, thus
-        # bypassing any file loading. (Our extension of clone() above copies
-        # over other attributes as well so that the end result looks consistent
-        # with reality.)
         new_config = SSHConfig()
-        # TODO: as with other spots, this implies SSHConfig needs a cleaner
-        # public API re: creating and updating its core data.
         new_config._config = copy.deepcopy(self.base_ssh_config._config)
         return dict(kwargs, ssh_config=new_config)
 
     def _load_ssh_files(self):
-        # TODO: does this want to more closely ape the behavior of
-        # InvokeConfig.load_files? re: having a _found attribute for each that
-        # determines whether to load or skip
         if self._runtime_ssh_path is not None:
             path = self._runtime_ssh_path
-            # Manually blow up like open() (_load_ssh_file normally doesn't)
             if not os.path.exists(path):
                 raise FileNotFoundError(
                     errno.ENOENT, "No such file or directory", path
@@ -165,23 +103,7 @@ class Config(InvokeConfig):
 
     @staticmethod
     def global_defaults():
-        # TODO: hrm should the run-related things actually be derived from the
-        # runner_class? E.g. Local defines local stuff, Remote defines remote
-        # stuff? Doesn't help with the final config tree tho...
-        # TODO: as to that, this is a core problem, Fabric wants split
-        # local/remote stuff, eg replace_env wants to be False for local and
-        # True remotely; shell wants to differ depending on target (and either
-        # way, does not want to use local interrogation for remote)
-        # TODO: is it worth moving all of our 'new' settings to a discrete
-        # namespace for cleanliness' sake? e.g. ssh.port, ssh.user etc.
-        # It wouldn't actually simplify this code any, but it would make it
-        # easier for users to determine what came from which library/repo.
         defaults = InvokeConfig.global_defaults()
-        # TODO 4.0: this is already a mess, strongly consider a new 'ssh'
-        # subtree because otherwise it's guessing where, or whether, 'ssh' is
-        # in the setting name! i.e. 'inline_ssh_env' -> ssh.use_inline_env,
-        # 'load_ssh_configs' -> ssh.load_configs, 'ssh_config_path' ->
-        # ssh.config_path, etc
         ours = {
             "authentication": {
                 "identities": [],
@@ -196,8 +118,6 @@ class Config(InvokeConfig):
             "runners": {"remote": Remote, "remote_shell": RemoteShell},
             "ssh_config_path": None,
             "tasks": {"collection_name": "fabfile"},
-            # TODO: this becomes an override/extend once Invoke grows execution
-            # timeouts (which should be timeouts.execute)
             "timeouts": {"connect": None},
             "user": get_local_user(),
         }

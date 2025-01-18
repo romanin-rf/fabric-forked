@@ -1,125 +1,13 @@
 from paramiko.config import SSHConfig
-from paramiko.auth_strategy import AuthStrategy
-from invoke.executor import Executor
-from invoke.runners import Runner
-from invoke.config import (
-    Config as InvokeConfig,
-    DataProxy as InvokeDataProxy,
-)
+from invoke.config import Config as InvokeConfig
 
-from .connection import ConnectKwargs, Gateway
+from ._types import (
+    _InvokeConfigNamespace, _FabricConfigNamespace,
+    FabricConfigDefaults
+)
 
 from os import PathLike
-from typing_extensions import (
-    Any,
-    Literal, LiteralString,
-    TypedDict,
-    IO
-)
-
-#from .runners import Remote, RemoteShell
-#from .util import get_local_user, debug
-
-class _InvokeConfigNamespace:
-    _proxies: tuple[str | LiteralString, ...]
-    _keypath: tuple[str, ...]
-    _root: InvokeDataProxy
-    
-    _config: dict[str, Any]
-    _defaults: dict[str, Any]
-    _file_suffixes: tuple[str, ...]
-    _collection: dict[str, Any]
-    _system_prefix: str | None
-    _system_path: PathLike[str | bytes] | None
-    _system_found: str | None
-    _user_prefix: str
-    _user_path: PathLike[str | bytes] | None
-    _user_found: str | None
-    _user: dict[str, Any]
-    _project_prefix: str | None
-    _project_path: PathLike[str | bytes] | None
-    _project_found: str | None
-    _project: dict[str, Any]
-    _runtime_path: PathLike[str | bytes] | None
-    _runtime: dict[str, Any]
-    _runtime_found: str | None
-    _env_prefix: str
-    _env: dict[str, Any]
-    _overrides: dict[str, Any]
-    _modifications: dict[str, Any]
-    _deletions: dict[str, Any]
-    
-    run: InvokeConfigDefaultsRun
-    runners: dict[str, Runner]
-    sudo: InvokeConfigDefaultsSudo
-    tasks: InvokeConfigDefaultsTasks
-    timeouts: dict[str, float | None]
-
-class InvokeConfigDefaultsRun(TypedDict):
-    asynchronous: bool
-    disown: bool
-    dry: bool
-    echo: bool
-    echo_stdin: IO[str] | None
-    encoding: str | None
-    env: dict[str, str]
-    err_stream: Any | None
-    fallback: bool
-    hide: LiteralString | Literal[False] | None
-    in_stream: Any | None
-    out_stream: Any | None
-    echo_format: str
-    pty: bool
-    replace_env: bool
-    shell: str
-    warn: bool
-    watchers: list[Any]
-
-class InvokeConfigDefaultsSudo(TypedDict):
-    password: str | None
-    prompt: str
-    user: str | None
-
-class InvokeConfigDefaultsTasks(TypedDict):
-    auto_dash_names: bool
-    collection_name: str
-    dedupe: bool
-    executor_class: type[Executor] | None
-    ignore_unknown_help: bool
-    search_root: str | None
-
-class InvokeConfigDefaults(TypedDict):
-    run: InvokeConfigDefaultsRun
-    runners: dict[str, Runner]
-    sudo: InvokeConfigDefaultsSudo
-    tasks: InvokeConfigDefaultsTasks
-    timeouts: dict[str, float | None]
-
-
-class _FabricConfigNamespace:
-    authentication: FabricConfigDefaultsAuth
-    connect_kwargs: ConnectKwargs
-    forward_agent: bool
-    gateway: Gateway | None
-    inline_ssh_env: bool
-    load_ssh_configs: bool
-    port: str
-    ssh_config_path: PathLike[str] | None
-
-
-class FabricConfigDefaultsAuth(TypedDict):
-    identities: list[tuple[str | None, str | None, int | None]]
-    strategy_class: type[AuthStrategy]
-
-class FabricConfigDefaults(InvokeConfig):
-    authentication: FabricConfigDefaultsAuth
-    connect_kwargs: ConnectKwargs
-    forward_agent: bool
-    gateway: Gateway | None
-    inline_ssh_env: bool
-    load_ssh_configs: bool
-    port: str
-    ssh_config_path: PathLike[str] | None
+from typing_extensions import Any
 
 
 class Config(InvokeConfig, _InvokeConfigNamespace, _FabricConfigNamespace):

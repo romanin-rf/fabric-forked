@@ -1,10 +1,31 @@
 [tool.poetry]
 name = "fabric-forked"
-version = "1.322.0"
-description = "High level SSH command execution (forked by fabric)."
-authors = ["Romanin <60302782+romanin-rf@users.noreply.github.com>"]
+version = "3.2.2.post0"
+description = "High level SSH command execution (forked by 'fabric')."
+authors = [
+    "Romanin <60302782+romanin-rf@users.noreply.github.com>",
+    "Jeff Forcier <jeff@bitprophet.org>"
+]
 license = "MIT"
-readme = "README.md"
+readme = "README.rst"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Clustering",
+    "Topic :: System :: Software Distribution",
+    "Topic :: System :: Systems Administration",
+]
 
 [tool.poetry.dependencies]
 python = ">=3.10"

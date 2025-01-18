@@ -24,3 +24,10 @@ class InvalidV1Env(Exception):
     """
 
     pass
+
+
+class ToDoWarning(Warning):
+    pass
+
+class NotImplementedWarning(Warning):
+    pass

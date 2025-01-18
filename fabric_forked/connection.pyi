@@ -19,10 +19,10 @@ from os import PathLike
 from typing_extensions import (
     Any,
     IO,
+    NamedTuple, TypedDict,
     Literal,
     Callable,
-    NamedTuple,
-    Self, TypeVar, TypedDict, Unpack
+    Self, TypeVar, Unpack
 )
 
 RunKwargs = InvokeConfigDefaultsRun
@@ -66,6 +66,18 @@ class ConnectKwargs(TypedDict):
     disabled_algorithms: dict[str, list[str]]
     transport_factory: Callable[..., Transport]
     auth_strategy: AuthStrategy
+
+
+class ConnectionKwargs(TypedDict):
+    host: str
+    user: str | None
+    port: int | None
+    config: Config | None
+    gateway: str | Gateway | Literal[False] | None
+    forward_agent: bool | None
+    connect_timeout: float | None
+    connect_kwargs: ConnectKwargs | None
+    inline_ssh_env: bool | None
 
 
 Gateway = Channel | ProxyCommand | Connection

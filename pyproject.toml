@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "fabric-forked"
-version = "3.2.2.post0"
+version = "3.2.2.post1"
 description = "High level SSH command execution (forked by 'fabric')."
 authors = [
-    { name = "Romanin", email = "semina054@gmail.com" }
+    "Romanin <semina054@gmail.com>",
 ]
 maintainers = [
-    { name = "Jeff Forcier", email = "jeff@bitprophet.org" },
+    "Jeff Forcier <jeff@bitprophet.org>",
 ]
 license = "MIT"
 readme = "README.md"

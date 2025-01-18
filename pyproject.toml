@@ -3,11 +3,13 @@ name = "fabric-forked"
 version = "3.2.2.post0"
 description = "High level SSH command execution (forked by 'fabric')."
 authors = [
-    "Romanin <60302782+romanin-rf@users.noreply.github.com>",
-    "Jeff Forcier <jeff@bitprophet.org>"
+    { name = "Romanin", email = "semina054@gmail.com" }
+]
+maintainers = [
+    { name = "Jeff Forcier", email = "jeff@bitprophet.org" },
 ]
 license = "MIT"
-readme = "README.rst"
+readme = "README.md"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
@@ -27,6 +29,15 @@ classifiers = [
     "Topic :: System :: Systems Administration",
 ]
 
+[project.urls]
+homepage = "https://github.com/fabric/fabric"
+repository = "https://github.com/romanin-rf/fabric-forked"
+documentation = "https://docs.fabfile.org"
+"Issues" = "https://github.com/fabric/fabric/issues"
+"Changelog" = "https://www.fabfile.org/changelog.html"
+"CI" = "https://app.circleci.com/pipelines/github/fabric/fabric"
+"Twitter" = "https://twitter.com/pyfabric"
+
 [tool.poetry.dependencies]
 python = ">=3.10"
 paramiko = "^3.5.0"
@@ -34,6 +45,11 @@ invoke = "^2.2.0"
 typing-extensions = "^4.12.2"
 decorator = "^5.1.1"
 
+[project.scripts]
+my_package_cli = 'fabric_forked.main:program.run'
+
+[tool.poetry.extras]
+pytest = ["pytest"]
 
 [build-system]
 requires = ["poetry-core"]

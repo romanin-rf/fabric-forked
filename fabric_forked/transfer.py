@@ -1,7 +1,3 @@
-"""
-File transfer via SFTP and/or SCP.
-"""
-
 import os
 import posixpath
 import stat

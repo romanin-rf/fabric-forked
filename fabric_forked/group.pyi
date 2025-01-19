@@ -1,7 +1,7 @@
 from queue import Queue
 
-from .connection import Connection, ConnectKwargs
-from .exceptions import NotImplementedWarning
+from .connection import Connection
+from ._types import ConnectKwargs
 
 from typing_extensions import (
     Any,
@@ -100,7 +100,7 @@ class Group(list[Connection]):
         """
         ...
     
-    @deprecated('This method is not implemented', category=NotImplementedWarning)
+    @deprecated('This method is not implemented')
     def _do(self, method: str, *args, **kwargs) -> Never: ...
     
     def run(self, *args, **kwargs):

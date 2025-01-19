@@ -16,7 +16,6 @@ class Executor(invoke.Executor):
         return dicts
 
     def expand_calls(self, calls, apply_hosts=True):
-        # Generate new call list with per-host variants & Connections inserted
         ret = []
         cli_hosts = []
         host_str = self.core[0].args.hosts.value

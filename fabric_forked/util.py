@@ -24,8 +24,8 @@ def get_local_user() -> str | None:
         pass
     except ImportError:  # pragma: nocover
         if win32:
-            import win32api # type: ignore
-            import win32security  # noqa # type: ignore
-            import win32profile  # noqa # type: ignore
+            import win32api
+            import win32security  # noqa
+            import win32profile  # noqa
             username = win32api.GetUserName()
     return username

@@ -99,7 +99,4 @@ class OpenSSHAuthStrategy(AuthStrategy):
             self.close()
 
     def close(self):
-        """
-        Shut down any resources we ourselves opened up.
-        """
         self.agent.close()

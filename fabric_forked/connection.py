@@ -23,7 +23,7 @@ def opens(method, self, *args, **kwargs):
     return method(self, *args, **kwargs)
 
 
-def derive_shorthand(host_string: str):
+def derive_shorthand(host_string):
     user_hostport = host_string.rsplit("@", 1)
     hostport = user_hostport.pop()
     user = user_hostport[0] if user_hostport and user_hostport[0] else None
@@ -106,6 +106,7 @@ class Connection(Context):
         self.host = host
         if "hostname" in self.ssh_config:
             self.host = self.ssh_config["hostname"]
+        self.user = user or self.ssh_config.get("user", self.config.user)
         self.port = port or int(self.ssh_config.get("port", self.config.port))
         self.gateway = gateway if gateway is not None else self.get_gateway()
         if forward_agent is None:
@@ -114,7 +115,6 @@ class Connection(Context):
                 map_ = {"yes": True, "no": False}
                 forward_agent = map_[self.ssh_config["forwardagent"]]
         self.forward_agent = forward_agent
-
         if connect_timeout is None:
             connect_timeout = self.ssh_config.get(
                 "connecttimeout", self.config.timeouts.connect
@@ -247,7 +247,6 @@ class Connection(Context):
                 fabric_config=self.config,
                 username=self.user,
             )
-        # Actually connect!
         result = self.client.connect(**kwargs)
         self.transport = self.client.get_transport()
         return result
@@ -327,25 +326,9 @@ class Connection(Context):
         return self._sftp
 
     def get(self, *args, **kwargs):
-        """
-        Get a remote file to the local filesystem or file-like object.
-
-        Simply a wrapper for `.Transfer.get`. Please see its documentation for
-        all details.
-
-        .. versionadded:: 2.0
-        """
         return Transfer(self).get(*args, **kwargs)
 
     def put(self, *args, **kwargs):
-        """
-        Put a local file (or file-like object) to the remote filesystem.
-
-        Simply a wrapper for `.Transfer.put`. Please see its documentation for
-        all details.
-
-        .. versionadded:: 2.0
-        """
         return Transfer(self).put(*args, **kwargs)
     
     @contextmanager
@@ -380,7 +363,7 @@ class Connection(Context):
                     raise wrapper.value
                 else:
                     raise ThreadException([wrapper])
-
+    
     @contextmanager
     @opens
     def forward_remote(

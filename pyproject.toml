@@ -39,7 +39,7 @@ documentation = "https://docs.fabfile.org"
 "Twitter" = "https://twitter.com/pyfabric"
 
 [tool.project.scripts]
-fabric = 'fabric_forked.main:program.run'
+fabric = 'fabric_forked.fabric.main:program.run'
 
 [tool.poetry.dependencies]
 python = ">=3.10"

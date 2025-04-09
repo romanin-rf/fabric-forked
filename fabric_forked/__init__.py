@@ -1,10 +1,11 @@
-from ._version import __version_info__, __version__
+from .fabric._version import __version_info__, __version__
 from .connection import Connection
-from .config import Config
-from .runners import Remote, RemoteShell, Result
-from .group import Group, SerialGroup, ThreadingGroup, GroupResult
-from .tasks import task, Task
-from .executor import Executor
+from .fabric.config import Config
+from .fabric.runners import Remote, RemoteShell, Result
+from .fabric.group import Group, SerialGroup, ThreadingGroup, GroupResult
+from .fabric.tasks import task, Task
+from .fabric.executor import Executor
+
 
 __all__ = [
     '__version_info__', '__version__',
@@ -16,8 +17,9 @@ __all__ = [
     'Executor'
 ]
 
+
 try:
-    from .auth import OpenSSHAuthStrategy
+    from .fabric.auth import OpenSSHAuthStrategy
     __all__.append('OpenSSHAuthStrategy')
 except ImportError:
     pass

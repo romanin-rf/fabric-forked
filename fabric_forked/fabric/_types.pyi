@@ -20,13 +20,15 @@ from .runners import Result as RunResult
 
 from os import PathLike
 from socket import SocketType
+from contextlib import contextmanager
 from typing_extensions import (
     Any,
     IO,
+    Iterator, Generator,
     NamedTuple, TypedDict,
     Literal, LiteralString,
     Callable,
-    TypeVar, TypeAlias
+    TypeVar, TypeAlias, Unpack
 )
 
 # ! CONFIG TYPES
@@ -76,7 +78,7 @@ class InvokeConfigDefaultsRun(TypedDict):
     env: dict[str, str] = {}
     err_stream: Any | None = None
     fallback: bool = True
-    hide: Literal['in', 'out'] | Literal[False] | None = None
+    hide: Literal['in', 'out'] | bool | None = None
     in_stream: Any | None = None
     out_stream: Any | None = None
     echo_format: str = "\033[1;37m{command}\033[0m"
@@ -136,11 +138,23 @@ class FabricConfigDefaults(InvokeConfig):
 
 Gateway = Channel | ProxyCommand | Connection
 
-RunKwargs: TypeAlias    = 'InvokeConfigDefaultsRun'
-SudoKwargs: TypeAlias   = 'InvokeConfigDefaultsSudo'
+RunKwargs: TypeAlias    = InvokeConfigDefaultsRun
+SudoKwargs: TypeAlias   = InvokeConfigDefaultsSudo
+
+class SudoRunKwargs(InvokeConfigDefaultsRun, InvokeConfigDefaultsSudo):
+    pass
+
 Result: TypeAlias       = RunResult | InvokeRunResult
 
 ReturnType              = TypeVar('ReturnType')
+
+
+class ShellKwargs(TypedDict):
+    encoding: str | None
+    env: dict[str | Any] | None
+    in_stream: Any | None
+    replace_env: bool
+    watchers: list[Any]
 
 
 class DictHost(TypedDict):
@@ -190,3 +204,71 @@ class ConnectionKwargs(TypedDict):
     connect_timeout: float | None
     connect_kwargs: 'ConnectKwargs' | None
     inline_ssh_env: bool | None
+
+# ! Invoke Types
+
+class DataProxy:
+    _proxies: tuple[str, ...]
+
+    @classmethod
+    def from_data(cls, data: dict[str, Any], root: 'DataProxy' | None = None, keypath: tuple[str, ...] = tuple()) -> 'DataProxy': ...
+    #def __getattr__(self, key: str) -> Unpack[DataProxy]: ...
+    #def __setattr__(self, key: str, value: Any) -> None: ...
+    #def __delattr__(self, name: str) -> None: ...
+    def __setitem__(self, key: str, value: str) -> None: ...
+    def __getitem__(self, key: str) -> Any: ...
+    def __delitem__(self, key: str) -> None: ...
+    def __iter__(self) -> Iterator[dict[str, Any]]: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __len__(self) -> int: ...
+    def __repr__(self) -> str: ...
+    def __contains__(self, key: str) -> bool: ...
+
+    @property
+    def _is_leaf(self) -> bool: ...
+
+    @property
+    def _is_root(self) -> bool: ...
+    
+    def _get(self, key: str) -> Any: ...
+    def _set(self, *args: Any, **kwargs: Any) -> None: ...
+    def _track_removal_of(self, key: str) -> None: ...
+    def _track_modification_of(self, key: str, value: str) -> None: ...
+    def clear(self) -> None: ...
+    def pop(self, *args: Any) -> Any: ...
+    def popitem(self) -> Any: ...
+    def setdefault(self, *args: Any) -> Any: ...
+    def update(self, *args: Any, **kwargs: Any) -> None: ...
+
+
+class Context(DataProxy):
+    config: Config
+    command_prefixes: list[str]
+    command_cwds: list[str]
+    
+    def __init__(self, config: Config | None = None) -> None: ...
+
+    @property
+    def config(self) -> Config: ...
+
+    @config.setter
+    def config(self, value: Config) -> None: ...
+
+    def run(self, command: str, **kwargs: Unpack[RunKwargs]) -> Result | None: ...
+    def _run(self, runner: "Runner", command: str, **kwargs: Unpack[RunKwargs]) -> InvokeRunResult | None: ...
+
+    def sudo(self, command: str, **kwargs: Unpack[SudoRunKwargs]) -> InvokeRunResult | None: ...
+    def _sudo(
+        self, runner: "Runner", command: str, **kwargs: Unpack[SudoRunKwargs]
+    ) -> InvokeRunResult | None: ...
+
+    def _prefix_commands(self, command: str) -> str: ...
+
+    @contextmanager
+    def prefix(self, command: str) -> Generator[None, None, None]: ...
+
+    @property
+    def cwd(self) -> str: ...
+
+    @contextmanager
+    def cd(self, path: PathLike | str) -> Generator[None, None, None]: ...

@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 
-from invoke import Context
+#from invoke import Context
 from paramiko.agent import AgentRequestHandler
 from paramiko.client import SSHClient
 from paramiko.sftp_client import SFTPClient
@@ -10,12 +10,13 @@ from paramiko.transport import Transport
 from paramiko.channel import Channel
 
 from .config import Config
-from .runners import Remote
+from .runners import Remote, Result
 from ._types import (
-    Result, Gateway,
+    Gateway,
     DictHost, ConnectKwargs,
-    SudoKwargs, RunKwargs,
-    AttributeDict
+    SudoKwargs, RunKwargs, SudoRunKwargs, ShellKwargs,
+    AttributeDict,
+    Context
 )
 
 from os import PathLike
@@ -314,7 +315,7 @@ class Connection(Context):
     def __eq__(self, other: Connection) -> bool: ...
     def __lt__(self, other: Connection) -> bool: ...
     def __hash__(self) -> int: ...
-    def __getattr__(self, key: str): ...
+    #def __getattr__(self, key: str): ...
     
     def __enter__(self) -> Self: ...
     def __exit__(self, *args: type[BaseException] | BaseException | None) -> None: ...
@@ -408,7 +409,7 @@ class Connection(Context):
         """
         ...
     
-    def sudo(self, command: str, **kwargs: Unpack[SudoKwargs]) -> Result | None:
+    def sudo(self, command: str, **kwargs: Unpack[SudoRunKwargs]) -> Result | None:
         """
         Execute a shell command, via ``sudo``, on the remote end.
 
@@ -421,7 +422,7 @@ class Connection(Context):
         """
         ...
     
-    def shell(self, **kwargs: Unpack[RunKwargs]) -> Result | None:
+    def shell(self, **kwargs: Unpack[ShellKwargs]) -> Result | None:
         """
         Run an interactive login shell on the remote end, as with ``ssh``.
 
